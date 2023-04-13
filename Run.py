@@ -71,12 +71,12 @@ def run():
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
-		# host="localhost",
-		# user="root",
-		# password="admin"
 		host="localhost",
 		user="root",
-		password="12345678"
+		password="admin"
+		# host="localhost",
+		# user="root",
+		# password="12345678"
 	)
 	#Crear un cursor para ejecutar comandos SQL
 	cur = conn.cursor()
