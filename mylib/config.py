@@ -5,12 +5,13 @@
 # e.g., 'email@gmail.com'
 MAIL = ''
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
-url = "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
+#url = "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
+url = "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream"
 
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = False
 # Set max. people inside limit. Optimise number below: 10, 50, 100, etc.
-Threshold = 10
+# Threshold = 10
 # Threading ON/OFF
 Thread = False
 # Auto run/Schedule the software to run at your desired time
@@ -25,7 +26,8 @@ line_color = (0, 0, 0)  #Color de la línea en formato BGR
 line_thickness = 3      #Grosor de la línea en píxeles
 line_position = 140     #Posición verticall de la línea
 
-#Definir las variables del recorte de la imagen: pixel_start= en que pixel comienza la imagen y pixel_end= a donde termina la imagen
+#Definir las variables del recorte de la imagen: pixel_start= en que pixel 
+# comienza la imagen y pixel_end= a donde termina la imagen
 pixel_start_height = 0
 pixel_start_width = 0
 pixel_end_height = 500
@@ -39,6 +41,8 @@ downIsEntry = False
 #Argumentos
 prototxt = "mobilenet_ssd/MobileNetSSD_deploy.prototxt"
 model = "mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
+confidence_config = 0.2
+skip_frames = 10
 
 #===============================================================================
 #===============================================================================

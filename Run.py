@@ -12,7 +12,7 @@ import time, dlib, datetime
 from datetime import datetime
 from itertools import zip_longest
 import mysql.connector
-from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width 
+from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames 
 
 t0 = time.time()
 #Declaramos la variable global ocupación anterior al principio del código, 
@@ -21,19 +21,8 @@ ocu_anterior = -1
 
 def run():
 
-	# construct the argument parse and parse the arguments
-	ap = argparse.ArgumentParser()
-	ap.add_argument("-o", "--output", type=str,
-		help="path to optional output video file")
-	# confidence default 0.4
-	ap.add_argument("-c", "--confidence", type=float, default=0.4,
-		help="minimum probability to filter weak detections")
-	ap.add_argument("-s", "--skip-frames", type=int, default=30,
-		help="# of skip frames between detections")
-	args = vars(ap.parse_args())
-
-	# initialize the list of class labels MobileNet SSD was trained to
-	# detect
+	# initialize the list of class labels MobileNet SSD was trained to detect
+	#Contiene el nombre de las clases que se utilizan en el modelo de detección de objetos
 	CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
 		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
 		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
@@ -44,7 +33,7 @@ def run():
 
 	# grab a reference to the ip camera
 	print("[INFO] Starting the live stream..")
-	vs = VideoStream(config.url).start()
+	 
 	#vs = VideoStream("rtsp://tapo233F:Riouch2000@192.168.1.12:8080").start()
 	time.sleep(2.0)
 
@@ -82,9 +71,12 @@ def run():
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
+		# host="localhost",
+		# user="root",
+		# password="admin"
 		host="localhost",
 		user="root",
-		password="admin"
+		password="12345678"
 	)
 	#Crear un cursor para ejecutar comandos SQL
 	cur = conn.cursor()
@@ -115,9 +107,6 @@ def run():
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
-		#print("frame = vs.read" + frame)
-
-		frame = frame[1] if args.get("input", False) else frame
 
 		# resize the frame to have a maximum width of 500 pixels (the
 		# less data we have, the faster we can process it), then convert
@@ -138,7 +127,7 @@ def run():
 
 		# check to see if we should run a more computationally expensive
 		# object detection method to aid our tracker
-		if totalFrames % args["skip_frames"] == 0:
+		if totalFrames % skip_frames == 0:
 			# set the status and initialize our new set of object trackers
 			status = "Detecting"
 			trackers = []
@@ -157,7 +146,7 @@ def run():
 
 				# filter out weak detections by requiring a minimum
 				# confidence
-				if confidence > args["confidence"]:
+				if confidence > confidence_config:
 					# extract the index of the class label from the
 					# detections list
 					idx = int(detections[0, 0, i, 1])
@@ -170,7 +159,6 @@ def run():
 					# for the object
 					box = detections[0, 0, i, 3:7] * np.array([W, H, W, H])
 					(startX, startY, endX, endY) = box.astype("int")
-
 
 					# construct a dlib rectangle object from the bounding
 					# box coordinates and then start the dlib correlation
@@ -255,14 +243,14 @@ def run():
 							totalDown += 1
 							empty1.append(totalDown)
 							#print(empty1[-1])
-							# if the people limit exceeds over threshold, send an email alert
-							if sum(x) >= config.Threshold:
-								cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
-									cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
-								if config.ALERT:
-									print("[INFO] Sending email alert..")
-									Mailer().send(config.MAIL)
-									print("[INFO] Alert sent")
+							# # if the people limit exceeds over threshold, send an email alert
+							# if sum(x) >= config.Threshold:
+							# 	cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
+							# 		cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
+							# 	if config.ALERT:
+							# 		print("[INFO] Sending email alert..")
+							# 		Mailer().send(config.MAIL)
+							# 		print("[INFO] Alert sent")
 
 							to.counted = True
 					else:
@@ -275,13 +263,13 @@ def run():
 						elif direction > 0 and centroid[1] > line_position:
 							totalUp += 1
 							empty1.append(totalUp)
-							if sum(x) >= config.Threshold:
-								cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
-									cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
-								if config.ALERT:
-									print("[INFO] Sending email alert..")
-									Mailer().send(config.MAIL)
-									print("[INFO] Alert sent")
+							# if sum(x) >= config.Threshold:
+							# 	cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
+							# 		cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
+							# 	if config.ALERT:
+							# 		print("[INFO] Sending email alert..")
+							# 		Mailer().send(config.MAIL)
+							# 		print("[INFO] Alert sent")
 
 							to.counted = True
 						
@@ -364,19 +352,14 @@ def run():
 			if num_seconds > 28800:
 				break
 
+	#Termina bucle
+
 	# stop the timer and display FPS information
 	fps.stop()
 	print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
 	print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 
-	# # if we are not using a video file, stop the camera video stream
-	# if not args.get("input", False):
-	# 	vs.stop()
-	#
-	# # otherwise, release the video file pointer
-	# else:
-	# 	vs.release()
 	
 	# issue 15
 	if config.Thread:

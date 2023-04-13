@@ -1,4 +1,4 @@
-# Importar el módulo sqlite3
+# Importar el módulo mysql
 import mysql.connector
 
 # Establecer la conexión a la base de datos
