@@ -30,6 +30,7 @@ def run():
 
 	# load our serialized model from disk
 	net = cv2.dnn.readNetFromCaffe(prototxt, model)
+	vs = VideoStream(config.url).start()
 
 	# grab a reference to the ip camera
 	print("[INFO] Starting the live stream..")
