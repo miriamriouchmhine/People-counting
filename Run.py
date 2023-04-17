@@ -33,7 +33,14 @@ def run():
 
 	# grab a reference to the ip camera
 	print("[INFO] Starting the live stream..")
-	 
+	vs = VideoStream(config.url).start()
+	# Obtener número total de fotogramas
+	total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
+	frame_count = 0
+	#total_frames = vs.count_frames()
+
+	# Imprimir número total de fotogramas
+	print('Número total de fotogramas: ', total_frames)
 	#vs = VideoStream("rtsp://tapo233F:Riouch2000@192.168.1.12:8080").start()
 	time.sleep(2.0)
 
@@ -65,18 +72,18 @@ def run():
 
 	if config.Thread:
 		vs = thread.ThreadingClass(config.url)
-		print("vs = thread")
-		print(frame)
+		#print("vs = thread")
+		#print(frame)
 
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
-		host="localhost",
-		user="root",
-		password="admin"
 		# host="localhost",
 		# user="root",
-		# password="12345678"
+		# password="admin"
+		host="localhost",
+		user="root",
+		password="12345678"
 	)
 	#Crear un cursor para ejecutar comandos SQL
 	cur = conn.cursor()
@@ -107,7 +114,11 @@ def run():
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
-
+		if frame is None:
+			break
+		frame_count += 1
+		#print('Número total de fotogramas: ', total_frames)
+		print('Frame contados: ', frame_count)
 		# resize the frame to have a maximum width of 500 pixels (the
 		# less data we have, the faster we can process it), then convert
 		# the frame from BGR to RGB for dlib

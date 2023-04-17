@@ -5,8 +5,8 @@
 # e.g., 'email@gmail.com'
 MAIL = ''
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
-url = "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
-# url = "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream"
+#url = "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
+url = "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream"
 
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = False
@@ -41,8 +41,8 @@ downIsEntry = False
 #Argumentos
 prototxt = "mobilenet_ssd/MobileNetSSD_deploy.prototxt"
 model = "mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
-confidence_config = 0.2
-skip_frames = 10
+confidence_config = 0.4
+skip_frames = 30
 
 #===============================================================================
 #===============================================================================
