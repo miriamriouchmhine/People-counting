@@ -116,7 +116,7 @@ def run():
 			break
 		frame_count += 1
 		#print('Número total de fotogramas: ', total_frames)
-		print('Frame contados: ', frame_count)
+		#print('Frame contados: ', frame_count)
 		
 		# resize the frame to have a maximum width of 500 pixels (the
 		# less data we have, the faster we can process it), then convert
@@ -144,7 +144,7 @@ def run():
 
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
+			blob = cv2.dnn.blobFromImage(frame, 0.0117647059, (W, H), 85)
 			net.setInput(blob)
 			detections = net.forward()
 
