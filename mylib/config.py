@@ -41,6 +41,7 @@ downIsEntry = False
 #Argumentos
 prototxt = "mobilenet_ssd/MobileNetSSD_deploy.prototxt"
 model = "mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
+
 confidence_config = 0.4
 skip_frames = 30
 

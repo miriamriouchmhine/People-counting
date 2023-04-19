@@ -30,10 +30,13 @@ def run():
 
 	# load our serialized model from disk
 	net = cv2.dnn.readNetFromCaffe(prototxt, model)
-
+	vs = VideoStream(config.url).start()
+	# Obtener número total de fotogramas
+	total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
+	frame_count = 0
+	
 	# grab a reference to the ip camera
 	print("[INFO] Starting the live stream..")
-	vs = VideoStream(config.url).start()
 	# Obtener número total de fotogramas
 	total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
 	frame_count = 0
@@ -41,7 +44,6 @@ def run():
 
 	# Imprimir número total de fotogramas
 	print('Número total de fotogramas: ', total_frames)
-	#vs = VideoStream("rtsp://tapo233F:Riouch2000@192.168.1.12:8080").start()
 	time.sleep(2.0)
 
 
@@ -72,8 +74,7 @@ def run():
 
 	if config.Thread:
 		vs = thread.ThreadingClass(config.url)
-		#print("vs = thread")
-		#print(frame)
+		
 
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
@@ -114,11 +115,11 @@ def run():
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
-		if frame is None:
-			break
+
 		frame_count += 1
 		#print('Número total de fotogramas: ', total_frames)
-		print('Frame contados: ', frame_count)
+		#print('Frame contados: ', frame_count)
+
 		# resize the frame to have a maximum width of 500 pixels (the
 		# less data we have, the faster we can process it), then convert
 		# the frame from BGR to RGB for dlib
@@ -145,7 +146,7 @@ def run():
 
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
+			blob = cv2.dnn.blobFromImage(frame, 0.0117647059, (W, H), 85)
 			net.setInput(blob)
 			detections = net.forward()
 
