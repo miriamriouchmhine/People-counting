@@ -6,7 +6,7 @@
 MAIL = ''
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
 #url = "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
-url = "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream"
+url = "rtsp://tapo2912:Riouch2000@192.168.1.6:554/h264/ch1/main/av_stream"
 
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = False
@@ -24,7 +24,7 @@ Timer = False
 #Definir las variables de la línea
 line_color = (0, 0, 0)  #Color de la línea en formato BGR
 line_thickness = 3      #Grosor de la línea en píxeles
-line_position = 140     #Posición verticall de la línea
+line_position = 130    #Posición verticall de la línea
 
 #Definir las variables del recorte de la imagen: pixel_start= en que pixel 
 # comienza la imagen y pixel_end= a donde termina la imagen

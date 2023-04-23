@@ -21,6 +21,12 @@ ocu_anterior = -1
 
 def run():
 
+	# construct the argument parse and parse the arguments
+	ap = argparse.ArgumentParser()
+	ap.add_argument("-i", "--input", type=str,
+		help="path to optional input video file")
+	args = vars(ap.parse_args())
+
 	# initialize the list of class labels MobileNet SSD was trained to detect
 	#Contiene el nombre de las clases que se utilizan en el modelo de detección de objetos
 	CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
@@ -30,23 +36,23 @@ def run():
 
 	# load our serialized model from disk
 	net = cv2.dnn.readNetFromCaffe(prototxt, model)
-	vs = VideoStream(config.url).start()
+	if not args.get("input", False):
+		# grab a reference to the ip camera
+		print("[INFO] Starting the live stream..")
+		vs = VideoStream(config.url).start()
+		time.sleep(2.0)
+
+	else:
+		print("[INFO] Starting the video..")
+		vs = cv2.VideoCapture(args["input"])
+
 	# Obtener número total de fotogramas
-	total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
-	frame_count = 0
-	
-	# grab a reference to the ip camera
-	print("[INFO] Starting the live stream..")
-	# Obtener número total de fotogramas
-	total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
+	#total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
 	frame_count = 0
 	#total_frames = vs.count_frames()
 
 	# Imprimir número total de fotogramas
-	print('Número total de fotogramas: ', total_frames)
-	time.sleep(2.0)
-
-
+	#print('Número total de fotogramas: ', total_frames)
 
 	# initialize the frame dimensions (we'll set them as soon as we read
 	# the first frame from the video)
@@ -115,6 +121,12 @@ def run():
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
+		frame = frame[1] if args.get("input", False) else frame
+
+		# if we are viewing a video and we did not grab a frame then we
+		# have reached the end of the video
+		if args["input"] is not None and frame is None:
+			break
 
 		frame_count += 1
 		#print('Número total de fotogramas: ', total_frames)
@@ -146,7 +158,9 @@ def run():
 
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			blob = cv2.dnn.blobFromImage(frame, 0.0117647059, (W, H), 85)
+			# blob = cv2.dnn.blobFromImage(frame, 0.0117647059, (W, H), 85)
+			blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
+			# blob = cv2.dnn.blobFromImage(frame, 0.01, (W, H), 100) 			
 			net.setInput(blob)
 			detections = net.forward()
 
@@ -287,7 +301,7 @@ def run():
 						
 					x = []
 					# compute the sum of total people inside
-					x.append(len(empty1)-len(empty))
+					x.append(len(empty)-len(empty1))
 					#print("Total people inside:", x)
 
 
