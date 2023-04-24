@@ -12,7 +12,7 @@ import time, dlib, datetime
 from datetime import datetime
 from itertools import zip_longest
 import mysql.connector
-from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames 
+from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, factor_escala 
 
 t0 = time.time()
 #Declaramos la variable global ocupación anterior al principio del código, 
@@ -85,12 +85,10 @@ def run():
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
-		# host="localhost",
-		# user="root",
-		# password="admin"
 		host="localhost",
 		user="root",
 		password="12345678"
+		# password="admin"
 	)
 	#Crear un cursor para ejecutar comandos SQL
 	cur = conn.cursor()
@@ -159,7 +157,7 @@ def run():
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
 			# blob = cv2.dnn.blobFromImage(frame, 0.0117647059, (W, H), 85)
-			blob = cv2.dnn.blobFromImage(frame, 0.007843, (W, H), 127.5)
+			blob = cv2.dnn.blobFromImage(frame, factor_escala, (W, H), media)
 			# blob = cv2.dnn.blobFromImage(frame, 0.01, (W, H), 100) 			
 			net.setInput(blob)
 			detections = net.forward()

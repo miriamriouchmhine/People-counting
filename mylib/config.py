@@ -13,7 +13,7 @@ ALERT = False
 # Set max. people inside limit. Optimise number below: 10, 50, 100, etc.
 # Threshold = 10
 # Threading ON/OFF
-Thread = False
+Thread = True
 # Auto run/Schedule the software to run at your desired time
 Scheduler = False
 # Auto stop the software after certain a time/hours
@@ -44,6 +44,9 @@ model = "mobilenet_ssd/MobileNetSSD_deploy.caffemodel"
 
 confidence_config = 0.4
 skip_frames = 30
+
+media = 127,5
+factor_escala = 1/media
 
 #===============================================================================
 #===============================================================================
