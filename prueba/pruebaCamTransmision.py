@@ -1,14 +1,18 @@
 import cv2
-
+import time
 # Lista de direcciones URL de las cámaras
 camera_urls = [
-    "rtsp://tapo2912:Riouch2000@192.168.102.120:554/h264/ch1/main/av_stream",
+    "rtsp://tapo2912:Riouch2000@192.168.1.7:554/h264/ch1/main/av_stream",
     # Agregue más direcciones URL aquí si desea visualizar más cámaras
 ]
 
 # Lista para almacenar las conexiones con las cámaras
 caps = []
+received_frames = 0
+start_time = time.time()
 
+capture_times = []
+display_times = []
 # Inicializa las conexiones con las cámaras
 for url in camera_urls:
     cap = cv2.VideoCapture(url)
@@ -52,7 +56,12 @@ while all([cap.isOpened() for cap in caps]):
         # Verifica si se pudo leer el siguiente frame
         if not ret:
             break
-
+        received_frames += 1
+        capture_time = time.time()  # Tiempo de captura
+        capture_times.append(capture_time)
+        display_time = time.time()  # Tiempo de visualización (antes de la llamada imshow)
+        display_times.append(display_time)
+        cv2.imshow(window_names[i], frame)
     # Muestra el frame en la ventana correspondiente a cada cámara
     for i, frame in enumerate(frames):
         cv2.imshow(window_names[i], frame)
@@ -60,6 +69,19 @@ while all([cap.isOpened() for cap in caps]):
     # Verifica si se presionó la tecla "q" para detener la ejecución
     if cv2.waitKey(25) & 0xFF == ord("q"):
         break
+end_time = time.time()
+elapsed_time = end_time - start_time
+fps = received_frames / elapsed_time
+total_duration = 30  # Duración total en segundos, ajusta según tus necesidades
+expected_frames = int(fps * total_duration)
+latency = sum(display_times) - sum(capture_times)
+average_jitter = sum(abs(display_times[i] - capture_times[i]) for i in range(len(capture_times))) / len(capture_times)
+
+print("Número de frames recibidos:", received_frames)
+print("Duración total (segundos):", elapsed_time)
+print("Número de frames esperados:", expected_frames)
+print("Latencia (segundos):", latency)
+print("Jitter promedio (segundos):", average_jitter)
 
 for cap in caps:
     cap.release()
