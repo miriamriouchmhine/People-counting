@@ -2,8 +2,9 @@ import cv2
 import time
 # Lista de direcciones URL de las cámaras
 camera_urls = [
-    "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream",
-    # Agregue más direcciones URL aquí si desea visualizar más cámaras
+    "rtsp://tapo2912:Riouch2000@192.168.1.7:554/h264/ch1/main/av_stream",
+    #"rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
+    #  Agregue más direcciones URL aquí si desea visualizar más cámaras
 ]
 
 # Lista para almacenar las conexiones con las cámaras
@@ -72,7 +73,7 @@ while all([cap.isOpened() for cap in caps]):
 end_time = time.time()
 elapsed_time = end_time - start_time
 fps = received_frames / elapsed_time
-total_duration = 30  # Duración total en segundos, ajusta según tus necesidades
+total_duration = elapsed_time  # Duración total en segundos, ajusta según tus necesidades
 expected_frames = int(fps * total_duration)
 latency = sum(display_times) - sum(capture_times)
 average_jitter = sum(abs(display_times[i] - capture_times[i]) for i in range(len(capture_times))) / len(capture_times)

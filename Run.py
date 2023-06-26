@@ -13,6 +13,8 @@ from datetime import datetime
 from itertools import zip_longest
 import mysql.connector
 from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, factor_escala 
+import telegram 
+import asyncio
 
 t0 = time.time()
 #Declaramos la variable global ocupación anterior al principio del código, 
@@ -33,7 +35,7 @@ def run():
 		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
 		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
 		"sofa", "train", "tvmonitor"]
-
+	
 	# load our serialized model from disk
 	net = cv2.dnn.readNetFromCaffe(prototxt, model)
 	if not args.get("input", False):
@@ -81,7 +83,25 @@ def run():
 	if config.Thread:
 		vs = thread.ThreadingClass(config.url)
 		
+#-------------------------BOTS---------------------------------------------------------
+#Cargar bot Admin
+	botAdmin = telegram.Bot(token= "6201064848:AAEjSID8nnPto0uwqQgWsW0r0Sjue7tnqig")
+	async def send_telegram_message(message):
+		await botAdmin.send_message(chat_id = "-1001947006979", text = message)
+	
+#Cargar bot alumnos
+	botAlumn = telegram.Bot(token= "6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg")
+	async def send_telegram_message_Alumn(message):
+		await botAlumn.send_message(chat_id = "-1001925970449", text = message)
+	
 
+#MAIN 
+	async def main():
+		await send_telegram_message_Alumn("Esta es una alerta de prueba")
+		
+	if __name__ == "__main__":
+		loop = asyncio.get_event_loop()
+		loop.run_until_complete(main())
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
@@ -312,6 +332,7 @@ def run():
 			cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 			cv2.circle(frame, (centroid[0], centroid[1]), 4, (255, 255, 255), -1)
+		
 
 		# construct a tuple of information we will be displaying on the
 		info = [
