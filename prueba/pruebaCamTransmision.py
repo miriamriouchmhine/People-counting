@@ -12,7 +12,7 @@ camera_urls = [
 caps = []
 received_frames = 0
 start_time = time.time()
-
+start_time_now = time.time()
 capture_times = []
 display_times = []
 # Inicializa las conexiones con las cámaras
@@ -27,6 +27,7 @@ for i, cap in enumerate(caps):
         exit()
 
 fps = FPS().start()
+
 # Lee el primer frame de video de cada cámara
 frames = []
 for i, cap in enumerate(caps):
@@ -69,14 +70,22 @@ while all([cap.isOpened() for cap in caps]):
     for i, frame in enumerate(frames):
         cv2.imshow(window_names[i], frame)
     fps.update()
+    current_time = time.time()
+    elapsed_time = current_time - start_time
+    if elapsed_time > 2:
+        fps.stop()
+        fps_value = fps.fps()
+        print(f"FPS: {fps_value}")
+        start_time = current_time
+        fps = FPS().start()
     # Verifica si se presionó la tecla "q" para detener la ejecución
     if cv2.waitKey(25) & 0xFF == ord("q"):
         break
-
-end_time = time.time()
-elapsed_time = end_time - start_time
-# fps = received_frames / elapsed_time
 fps.stop()
+end_time = time.time()
+elapsed_time = end_time - start_time_now
+# fps = received_frames / elapsed_time
+
 fps_value = fps.fps()
 total_duration = elapsed_time  # Duración total en segundos, ajusta según tus necesidades
 expected_frames = int(fps_value * total_duration)
