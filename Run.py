@@ -15,14 +15,16 @@ import mysql.connector
 from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, factor_escala 
 import telegram 
 import asyncio
+from mylib.alertas import verificar_estado_camara
 
 t0 = time.time()
+
 #Declaramos la variable global ocupación anterior al principio del código, 
 global ocu_anterior
 ocu_anterior = -1
 
 def run():
-
+	start_time = time.time()
 	# construct the argument parse and parse the arguments
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-i", "--input", type=str,
@@ -83,25 +85,34 @@ def run():
 	if config.Thread:
 		vs = thread.ThreadingClass(config.url)
 		
-#-------------------------BOTS---------------------------------------------------------
-#Cargar bot Admin
-	botAdmin = telegram.Bot(token= "TU_TOKEN")
-	async def send_telegram_message(message):
-		await botAdmin.send_message(chat_id = "TU_CHATID", text = message)
+# #-------------------------BOTS---------------------------------------------------------
+# #Cargar bot Admin
+# 	botAdmin = telegram.Bot(token= "6201064848:AAEjSID8nnPto0uwqQgWsW0r0Sjue7tnqig")
+# 	async def send_telegram_message(message):
+# 		await botAdmin.send_message(chat_id = "-1001947006979", text = message)
 	
-#Cargar bot alumnos
-	botAlumn = telegram.Bot(token= "TU_TOKEN")
-	async def send_telegram_message_Alumn(message):
-		await botAlumn.send_message(chat_id = "TU_CHATID", text = message)
+# #Cargar bot alumnos
+# 	botAlumn = telegram.Bot(token= "6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg")
+# 	async def send_telegram_message_Alumn(message):
+# 		await botAlumn.send_message(chat_id = "-1001925970449", text = message)
 	
 
-#MAIN 
-	async def main():
-		await send_telegram_message_Alumn("Esta es una alerta de prueba")
-		
-	if __name__ == "__main__":
-		loop = asyncio.get_event_loop()
-		loop.run_until_complete(main())
+# #MAIN 
+# 	async def main():
+# 		await send_telegram_message_Alumn("Esta es una alerta de prueba")
+# 		while True:
+# 			# Obtener el estado de la cámara
+# 			estado_camara = await verificar_estado_camara(config.url)
+# 			# Crear el mensaje de alerta
+# 			mensaje = "La cámara está conectada" if estado_camara else "La cámara no está conectada"
+# 			await send_telegram_message(mensaje)
+
+# 			# Esperar 30 minutos
+# 			await asyncio.sleep(30)
+
+# 	if __name__ == "__main__":
+# 		loop = asyncio.get_event_loop()
+# 		loop.run_until_complete(main())
 #-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
@@ -365,7 +376,15 @@ def run():
 			text = "{}: {}".format(k, v)
 			cv2.putText(frame, text, (265, H - ((i * 20) + 60)), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
-				
+		#------------Imprimir cada 5 segundos----------------
+		current_time = time.time()
+		elapsed_time = current_time - start_time
+		if elapsed_time > 2:
+			fps.stop()
+			fps_value = fps.fps()
+			print(f"FPS: {fps_value}")
+			start_time = current_time
+			fps = FPS().start()	
 		#------------------Conteo mostrando imagen en pantalla--------------------------------------------		
 		# show the output frame
 		cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
