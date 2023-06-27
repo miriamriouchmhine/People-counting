@@ -1,9 +1,10 @@
 import cv2
 import time
+from imutils.video import FPS
 # Lista de direcciones URL de las cámaras
 camera_urls = [
-    "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream",
-    #"rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
+    #"rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream",
+    "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
     #  Agregue más direcciones URL aquí si desea visualizar más cámaras
 ]
 
@@ -25,6 +26,7 @@ for i, cap in enumerate(caps):
         print(f"No se puede conectar a la cámara {i + 1}")
         exit()
 
+fps = FPS().start()
 # Lee el primer frame de video de cada cámara
 frames = []
 for i, cap in enumerate(caps):
@@ -66,15 +68,18 @@ while all([cap.isOpened() for cap in caps]):
     # Muestra el frame en la ventana correspondiente a cada cámara
     for i, frame in enumerate(frames):
         cv2.imshow(window_names[i], frame)
-
+    fps.update()
     # Verifica si se presionó la tecla "q" para detener la ejecución
     if cv2.waitKey(25) & 0xFF == ord("q"):
         break
+
 end_time = time.time()
 elapsed_time = end_time - start_time
-fps = received_frames / elapsed_time
+# fps = received_frames / elapsed_time
+fps.stop()
+fps_value = fps.fps()
 total_duration = elapsed_time  # Duración total en segundos, ajusta según tus necesidades
-expected_frames = int(fps * total_duration)
+expected_frames = int(fps_value * total_duration)
 latency = sum(display_times) - sum(capture_times)
 average_jitter = sum(abs(display_times[i] - capture_times[i]) for i in range(len(capture_times))) / len(capture_times)
 
@@ -83,6 +88,7 @@ print("Duración total (segundos):", elapsed_time)
 print("Número de frames esperados:", expected_frames)
 print("Latencia (segundos):", latency)
 print("Jitter promedio (segundos):", average_jitter)
+print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
 
 for cap in caps:
     cap.release()
