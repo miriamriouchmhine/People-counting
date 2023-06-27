@@ -2,7 +2,7 @@ import cv2
 import time
 # Lista de direcciones URL de las cámaras
 camera_urls = [
-    "rtsp://tapo2912:Riouch2000@192.168.1.7:554/h264/ch1/main/av_stream",
+    "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream",
     #"rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
     #  Agregue más direcciones URL aquí si desea visualizar más cámaras
 ]
