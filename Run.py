@@ -85,14 +85,14 @@ def run():
 		
 #-------------------------BOTS---------------------------------------------------------
 #Cargar bot Admin
-	botAdmin = telegram.Bot(token= "6201064848:AAEjSID8nnPto0uwqQgWsW0r0Sjue7tnqig")
+	botAdmin = telegram.Bot(token= "TU_TOKEN")
 	async def send_telegram_message(message):
-		await botAdmin.send_message(chat_id = "-1001947006979", text = message)
+		await botAdmin.send_message(chat_id = "TU_CHATID", text = message)
 	
 #Cargar bot alumnos
-	botAlumn = telegram.Bot(token= "6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg")
+	botAlumn = telegram.Bot(token= "TU_TOKEN")
 	async def send_telegram_message_Alumn(message):
-		await botAlumn.send_message(chat_id = "-1001925970449", text = message)
+		await botAlumn.send_message(chat_id = "TU_CHATID", text = message)
 	
 
 #MAIN 
