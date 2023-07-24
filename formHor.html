@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Actualizar Horario</title>
+</head>
+<body>
+    <form id="formulario" action="https://api.telegram.org/bot6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg/sendMessage" method="post">
+        <input type="text" name="chat_id" value="-1001925970449" hidden>
+        <label for="mes">Introduce el mes o meses:</label>
+        <input type="text" id="mes" name="mes" required value="" placeholder="Septiembre-Octubre">
+        <label for="dias">Introduce los días:</label>
+        <input type="text" id="dias" name="dias" required value="" placeholder="Lunes a Viernes">
+        <label for="horario">Introduce el mes:</label>
+        <input type="text" id="horario" name="horario" required value="" placeholder="8:30-21:00">
+        <input type="text" name="text" id="message_text" value="" hidden>
+        <input type="text" name="parse_mode" value="HTML" hidden> <!-- Agregamos el campo parse_mode con valor "HTML" -->
+        <input type="submit" value="Submit">
+      </form>
+
+      <script>
+        // Actualizar el valor del campo de texto "text"
+        document.getElementById("formulario").addEventListener("submit", function(event)
+        {
+            event.preventDefault(); // Evitar que se envíe el formulario
+
+          // Actualizar el valor del campo de texto "text"
+          var horario = document.getElementById("horario").value;
+          var mes = document.getElementById("mes").value;
+          var dias = document.getElementById("dias").value;
+          var message_text = "En " + mes +",el horario es de " + dias+ " de " + horario;
+          document.getElementById("message_text").value = message_text;
+          this.submit();
+        });
+      </script>
+</body>
+</html>

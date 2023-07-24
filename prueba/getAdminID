@@ -1,0 +1,16 @@
+import telegram
+import asyncio
+TOKEN = "6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg"
+
+async def obtener_id_administrador():
+    bot = telegram.Bot(TOKEN)
+    chat_id = "-1001925970449"  # El ID del canal debe comenzar con '-100'
+    administradores = await bot.get_chat_administrators(chat_id)
+    
+    for admin in administradores:
+        if admin.status == 'creator':
+            print(f"ID del administrador: {admin.user.id}")
+            break
+
+if __name__ == "__main__":
+    asyncio.run(obtener_id_administrador())
