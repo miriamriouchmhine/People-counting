@@ -9,20 +9,19 @@ import numpy as np
 import cv2
 import argparse, imutils
 import time, dlib, datetime
-from datetime import datetime
+from datetime import datetime, timedelta
 from itertools import zip_longest
 import mysql.connector
-from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, factor_escala 
-import telegram 
-import asyncio
-from mylib.alertas import verificar_estado_camara
+from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, factor_escala, esta_dentro_de_franja_horaria 
+import signal
+from mylib.alertas import obtener_ultimo_dato
 
 t0 = time.time()
 
 #Declaramos la variable global ocupación anterior al principio del código, 
 global ocu_anterior
 ocu_anterior = -1
-
+	
 def run():
 	start_time = time.time()
 	# construct the argument parse and parse the arguments
@@ -41,85 +40,30 @@ def run():
 	# load our serialized model from disk
 	net = cv2.dnn.readNetFromCaffe(prototxt, model)
 	if not args.get("input", False):
-		# grab a reference to the ip camera
-		print("[INFO] Starting the live stream..")
-		vs = VideoStream(config.url).start()
-		time.sleep(2.0)
+		if esta_dentro_de_franja_horaria():
+			# grab a reference to the ip camera
+			print("[INFO] Starting the live stream..")
+			vs = VideoStream(config.url).start()
+			time.sleep(2.0)
+		else:
+			print("Fuera de la franja horaria. Iniciando conteo desde cero.")
+			while not esta_dentro_de_franja_horaria():
+				time.sleep(1)
+			print("[INFO] Starting the live stream..")
+			vs = VideoStream(config.url).start()
+			time.sleep(2.0)
 
 	else:
 		print("[INFO] Starting the video..")
 		vs = cv2.VideoCapture(args["input"])
-
-	# Obtener número total de fotogramas
-	#total_frames = int(vs.stream.get(cv2.CAP_PROP_FRAME_COUNT))
-	frame_count = 0
-	#total_frames = vs.count_frames()
-
-	# Imprimir número total de fotogramas
-	#print('Número total de fotogramas: ', total_frames)
-
-	# initialize the frame dimensions (we'll set them as soon as we read
-	# the first frame from the video)
-	W = None
-	H = None
-
-	# instantiate our centroid tracker, then initialize a list to store
-	# each of our dlib correlation trackers, followed by a dictionary to
-	# map each unique object ID to a TrackableObject
-	ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
-	trackers = []
-	trackableObjects = {}
-
-	# initialize the total number of frames processed thus far, along
-	# with the total number of objects that have moved either up or down
-	totalFrames = 0
-	totalDown = 0
-	totalUp = 0
-	x = []
-	empty=[]
-	empty1=[]
-
-	# start the frames per second throughput estimator
-	fps = FPS().start()
-
-	if config.Thread:
-		vs = thread.ThreadingClass(config.url)
-		
-# #-------------------------BOTS---------------------------------------------------------
-# #Cargar bot Admin
-# 	botAdmin = telegram.Bot(token= "6201064848:AAEjSID8nnPto0uwqQgWsW0r0Sjue7tnqig")
-# 	async def send_telegram_message(message):
-# 		await botAdmin.send_message(chat_id = "-1001947006979", text = message)
 	
-# #Cargar bot alumnos
-# 	botAlumn = telegram.Bot(token= "6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg")
-# 	async def send_telegram_message_Alumn(message):
-# 		await botAlumn.send_message(chat_id = "-1001925970449", text = message)
-	
-
-# #MAIN 
-# 	async def main():
-# 		await send_telegram_message_Alumn("Esta es una alerta de prueba")
-# 		while True:
-# 			# Obtener el estado de la cámara
-# 			estado_camara = await verificar_estado_camara(config.url)
-# 			# Crear el mensaje de alerta
-# 			mensaje = "La cámara está conectada" if estado_camara else "La cámara no está conectada"
-# 			await send_telegram_message(mensaje)
-
-# 			# Esperar 30 minutos
-# 			await asyncio.sleep(30)
-
-# 	if __name__ == "__main__":
-# 		loop = asyncio.get_event_loop()
-# 		loop.run_until_complete(main())
-#-------------------------GUARDAR EN BASE DATOS-----------------------------------
+	#-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
 		host="localhost",
 		user="root",
-		password="12345678"
-		# password="admin"
+		#password="12345678"
+		password="admin"
 	)
 	#Crear un cursor para ejecutar comandos SQL
 	cur = conn.cursor()
@@ -136,7 +80,6 @@ def run():
 	def guardar_x(x):
 		#Obtener la fecha y hora actuales y convertirlas en cadenas de texto
 		fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-		# hora = datetime.datetime.now().strftime("%H:%M:%S")
 		#Insertar el registro en la tabla con los valores de fecha, hora  y ocupacion
 		cur.execute("INSERT INTO biblioteca (fecha_hora, ocupacion) VALUES (%s,%s)", (fecha_hora, x))
 		#Guardar los cambios en la base de datos
@@ -144,9 +87,62 @@ def run():
 
 		#comprobacion
 		print(f"Se ha insertadp el registro: {fecha_hora}, {x}")
+
+
+	ocu_inicio = obtener_ultimo_dato()
+	# Iniciar el conteo desde el último dato de ocupación o desde cero si es un nuevo día
+	if esta_dentro_de_franja_horaria():
+		print("Iniciando conteo desde la última ocupación registrada:", ocu_inicio)
+	else:
+		print("Fuera de la franja horaria. Iniciando conteo desde cero.")
+		# Esperar hasta que sea las 8:30 del próximo día
+		ocu_inicio = 0
+		guardar_x(ocu_inicio)
+		while not esta_dentro_de_franja_horaria():
+			time.sleep(1)
+		print("Iniciando conteo desde cero.")
+		
+	 
 	
+	# Obtener número total de fotogramas
+	frame_count = 0
+
+	# initialize the frame dimensions (we'll set them as soon as we read
+	# the first frame from the video)
+	W = None
+	H = None
+
+	# instantiate our centroid tracker, then initialize a list to store
+	# each of our dlib correlation trackers, followed by a dictionary to
+	# map each unique object ID to a TrackableObject
+	ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
+	trackers = []
+	trackableObjects = {}
+
+	# initialize the total number of frames processed thus far, along
+	# with the total number of objects that have moved either up or down
+	totalFrames = 0
+	if ocu_inicio < 0:
+		totalUp = abs(ocu_inicio)
+		totalDown = 0
+	else:
+		totalUp = 0
+		totalDown = ocu_inicio
+
+	x = []
+	empty=[]
+	empty1=[]
+
+	# start the frames per second throughput estimator
+	fps = FPS().start()
+
+	if config.Thread:
+		vs = thread.ThreadingClass(config.url)
+
+
 	# loop over frames from the video stream
 	while True:
+		
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
@@ -158,8 +154,6 @@ def run():
 			break
 
 		frame_count += 1
-		#print('Número total de fotogramas: ', total_frames)
-		#print('Frame contados: ', frame_count)
 
 		# resize the frame to have a maximum width of 500 pixels (the
 		# less data we have, the faster we can process it), then convert
@@ -187,9 +181,7 @@ def run():
 
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			# blob = cv2.dnn.blobFromImage(frame, 0.0117647059, (W, H), 85)
 			blob = cv2.dnn.blobFromImage(frame, factor_escala, (W, H), media)
-			# blob = cv2.dnn.blobFromImage(frame, 0.01, (W, H), 100) 			
 			net.setInput(blob)
 			detections = net.forward()
 
@@ -252,8 +244,6 @@ def run():
 		# object crosses this line we will determine whether they were
 		# moving 'up' or 'down'
 		cv2.line(frame, (0, line_position), (W, line_position), line_color, line_thickness)
-		#cv2.putText(frame, "-Prediction border - Entrance-", (10, H - ((i * 20) + 200)),
-			#cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1)
 
 		# use the centroid tracker to associate the (1) old object
 		# centroids with (2) the newly computed object centroids
@@ -297,15 +287,6 @@ def run():
 						elif direction > 0 and centroid[1] > line_position:
 							totalDown += 1
 							empty1.append(totalDown)
-							#print(empty1[-1])
-							# # if the people limit exceeds over threshold, send an email alert
-							# if sum(x) >= config.Threshold:
-							# 	cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
-							# 		cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
-							# 	if config.ALERT:
-							# 		print("[INFO] Sending email alert..")
-							# 		Mailer().send(config.MAIL)
-							# 		print("[INFO] Alert sent")
 
 							to.counted = True
 					else:
@@ -318,13 +299,6 @@ def run():
 						elif direction > 0 and centroid[1] > line_position:
 							totalUp += 1
 							empty1.append(totalUp)
-							# if sum(x) >= config.Threshold:
-							# 	cv2.putText(frame, "-ALERT: People limit exceeded-", (10, frame.shape[0] - 80),
-							# 		cv2.FONT_HERSHEY_COMPLEX, 0.5, (0, 0, 255), 2)
-							# 	if config.ALERT:
-							# 		print("[INFO] Sending email alert..")
-							# 		Mailer().send(config.MAIL)
-							# 		print("[INFO] Alert sent")
 
 							to.counted = True
 						
@@ -357,7 +331,7 @@ def run():
 		]
 
 		ocu = totalDown - totalUp
-		
+
 		#Obtenemos el valor de la variable ocupacion anterior
 		global ocu_anterior
 		# Comparar el valor actual con el anterior, si es diferente guardamos ese valor en la tabla, si no pasamos
@@ -382,24 +356,27 @@ def run():
 		if elapsed_time > 2:
 			fps.stop()
 			fps_value = fps.fps()
-			print(f"FPS: {fps_value}")
+			# print(f"FPS: {fps_value}")
 			start_time = current_time
-			fps = FPS().start()	
+			fps = FPS().start()
+
+		if not esta_dentro_de_franja_horaria():
+			schedule.every(1).seconds.do(run())
 		#------------------Conteo mostrando imagen en pantalla--------------------------------------------		
 		# show the output frame
-		cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
-		key = cv2.waitKey(1) & 0xFF
+		# cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
+		# key = cv2.waitKey(1) & 0xFF
 		
 
-		# if the `q` key was pressed, break from the loop
-		if key == ord("q"):
-			break
+		# # # if the `q` key was pressed, break from the loop
+		# if key == ord("q"):
+		# 	break
 		
 		#------------------Conteo sin mostrar imagen en pantalla------------------------------------------	
 		
-		# if the `q` key was pressed, break from the loop
-		# if cv2.waitKey(1) & 0xFF == ord("q"):
-		# 	break
+		#if the `q` key was pressed, break from the loop
+		if cv2.waitKey(1) & 0xFF == ord("q"):
+			break
 
 		#------------------------------------------------------------	
 
@@ -422,8 +399,6 @@ def run():
 	fps.stop()
 	print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
 	print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-
-
 	
 	# issue 15
 	if config.Thread:
@@ -435,13 +410,11 @@ def run():
 
 ##learn more about different schedules here: https://pypi.org/project/schedule/
 if config.Scheduler:
-	##Runs for every 1 second
-	#schedule.every(1).seconds.do(run)
-	##Runs at every day (09:00 am). You can change it.
-	schedule.every().day.at("09:00").do(run)
-
-	while 1:
-		schedule.run_pending()
+    print("scheduler")
+    schedule.every(1).seconds.do(run)
+    
+    while 1:
+	    schedule.run_pending()
 
 else:
 	run()
