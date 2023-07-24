@@ -3,11 +3,14 @@
 #===============================================================================
 # Enter mail below to receive real-time email alerts
 # e.g., 'email@gmail.com'
+import datetime
+
+
 MAIL = ''
 # Enter the ip camera url (e.g., url = 'http://191.138.0.100:8040/video')
 url = "rtsp://biblioteca:camaraBibAlex@192.168.102.120:554/h264/ch1/main/av_stream"
-#url = "rtsp://tapo2912:Riouch2000@192.168.1.9:554/h264/ch1/main/av_stream"
-
+#url = "rtsp://tapo2912:Riouch2000@192.168.1.8:554/h264/ch1/main/av_stream"
+ip = "192.168.102.120"
 # ON/OFF for mail feature. Enter True to turn on the email alert feature.
 ALERT = False
 # Set max. people inside limit. Optimise number below: 10, 50, 100, etc.
@@ -15,7 +18,7 @@ ALERT = False
 # Threading ON/OFF
 Thread = False
 # Auto run/Schedule the software to run at your desired time
-Scheduler = False
+Scheduler = True
 # Auto stop the software after certain a time/hours
 Timer = False
 
@@ -50,4 +53,24 @@ media = 95
 factor_escala = 0.010526315 
 
 #===============================================================================
-#===============================================================================
+# Variables de conexión a la base de datos
+db_config = {
+    "host": "localhost",
+    "user": "root",
+    "password": "admin",
+    "database": "db"  
+}
+
+  # Por ejemplo, de lunes a viernes
+
+# Verificar si la hora actual está dentro de la franja horaria de 8:30 a 21:00
+def esta_dentro_de_franja_horaria():
+    dias_permitidos = [0, 1, 2, 3, 4]
+    ahora = datetime.datetime.now()
+    # Verificar si el día de la semana está dentro de los días permitidos
+    if ahora.weekday() not in dias_permitidos:
+        return False
+    
+    hora_inicio = ahora.replace(hour=19, minute=8, second=0, microsecond=0)
+    hora_fin = ahora.replace(hour=19, minute=12, second=0, microsecond=0)
+    return hora_inicio <= ahora <= hora_fin
