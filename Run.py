@@ -98,9 +98,12 @@ def run():
 		# Esperar hasta que sea las 8:30 del próximo día
 		ocu_inicio = 0
 		guardar_x(ocu_inicio)
+		print("Iniciando conteo desde cero.")
 		while not esta_dentro_de_franja_horaria():
 			time.sleep(1)
 		print("Iniciando conteo desde cero.")
+		ocu_inicio = 0
+		guardar_x(ocu_inicio)
 		
 	 
 	
