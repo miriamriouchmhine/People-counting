@@ -37,25 +37,6 @@ def run():
 		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
 		"sofa", "train", "tvmonitor"]
 	
-	# load our serialized model from disk
-	net = cv2.dnn.readNetFromCaffe(prototxt, model)
-	if not args.get("input", False):
-		if esta_dentro_de_franja_horaria():
-			# grab a reference to the ip camera
-			print("[INFO] Starting the live stream..")
-			vs = VideoStream(config.url).start()
-			time.sleep(2.0)
-		else:
-			print("Fuera de la franja horaria. Iniciando conteo desde cero.")
-			while not esta_dentro_de_franja_horaria():
-				time.sleep(1)
-			print("[INFO] Starting the live stream..")
-			vs = VideoStream(config.url).start()
-			time.sleep(2.0)
-
-	else:
-		print("[INFO] Starting the video..")
-		vs = cv2.VideoCapture(args["input"])
 	
 	#-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
@@ -96,17 +77,27 @@ def run():
 		print("Iniciando conteo desde la última ocupación registrada:", ocu_inicio)
 	else:
 		# Esperar hasta que sea las 8:30 del próximo día
-		ocu_inicio = 1
+		ocu_inicio = 0
 		guardar_x(ocu_inicio)
 		print("Fuera de la franja horaria. Iniciando conteo desde cero.")
-		print("Iniciando conteo desde cero.")
 		while not esta_dentro_de_franja_horaria():
 			time.sleep(1)
 		print("Iniciando conteo desde cero.")
-		ocu_inicio = 1
+		ocu_inicio = 0
 		guardar_x(ocu_inicio)
 		
-	 
+	 # load our serialized model from disk
+	net = cv2.dnn.readNetFromCaffe(prototxt, model)
+	if not args.get("input", False):
+		# grab a reference to the ip camera
+		print("[INFO] Starting the live stream..")
+		vs = VideoStream(config.url).start()
+		time.sleep(2.0)
+
+	else:
+		print("[INFO] Starting the video..")
+		vs = cv2.VideoCapture(args["input"])
+	
 	
 	# Obtener número total de fotogramas
 	frame_count = 0
