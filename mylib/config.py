@@ -1,5 +1,5 @@
 #===============================================================================
-""" Optional features config. """
+#""" Optional features config. """
 #===============================================================================
 # Enter mail below to receive real-time email alerts
 # e.g., 'email@gmail.com'
@@ -71,6 +71,6 @@ def esta_dentro_de_franja_horaria():
     if ahora.weekday() not in dias_permitidos:
         return False
     
-    hora_inicio = ahora.replace(hour=19, minute=8, second=0, microsecond=0)
-    hora_fin = ahora.replace(hour=19, minute=12, second=0, microsecond=0)
+    hora_inicio = ahora.replace(hour=7, minute=40, second=0, microsecond=0)
+    hora_fin = ahora.replace(hour=18, minute=58, second=0, microsecond=0)
     return hora_inicio <= ahora <= hora_fin
