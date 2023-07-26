@@ -89,20 +89,21 @@ def run():
 		print(f"Se ha insertadp el registro: {fecha_hora}, {x}")
 
 
-	ocu_inicio = obtener_ultimo_dato()
+	
 	# Iniciar el conteo desde el último dato de ocupación o desde cero si es un nuevo día
 	if esta_dentro_de_franja_horaria():
+		ocu_inicio = obtener_ultimo_dato()
 		print("Iniciando conteo desde la última ocupación registrada:", ocu_inicio)
 	else:
-		print("Fuera de la franja horaria. Iniciando conteo desde cero.")
 		# Esperar hasta que sea las 8:30 del próximo día
-		ocu_inicio = 0
+		ocu_inicio = 1
 		guardar_x(ocu_inicio)
+		print("Fuera de la franja horaria. Iniciando conteo desde cero.")
 		print("Iniciando conteo desde cero.")
 		while not esta_dentro_de_franja_horaria():
 			time.sleep(1)
 		print("Iniciando conteo desde cero.")
-		ocu_inicio = 0
+		ocu_inicio = 1
 		guardar_x(ocu_inicio)
 		
 	 
