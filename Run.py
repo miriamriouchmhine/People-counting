@@ -173,7 +173,7 @@ def run():
 			factor = 1/media
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
-			blob = cv2.dnn.blobFromImage(frame, factor_escala, (W, H), media)
+			blob = cv2.dnn.blobFromImage(frame, factor, (W, H), media)
 			net.setInput(blob)
 			detections = net.forward()
 
