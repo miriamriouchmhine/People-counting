@@ -1,11 +1,11 @@
 import telegram
 #Crea una instancia del objeto 'Bot'
-botAdmin = telegram.Bot(token= "6201064848:AAEjSID8nnPto0uwqQgWsW0r0Sjue7tnqig")
+botAdmin = telegram.Bot(token= "TU_TOKEN")
 #Función que envia el mensaje que se le envia
 async def send_telegram_message(message):
     # Se utiliza el método send_message para enviar el mensaje que se le pasa como argumento,
     #  y utiliza el chat_id para saber a que canal enviarlo
-	await botAdmin.send_message(chat_id = "-1001947006979", text = message)
+	await botAdmin.send_message(chat_id = "TU_CHAT_ID", text = message)
 	
 async def main():
     await send_telegram_message("Esta es una alerta de prueba")

@@ -43,7 +43,7 @@ async def main():
 			connected = False
         
 		# Esperar 30 minutos
-		await asyncio.sleep(60)
+		await asyncio.sleep(1800)
 
 		
 asyncio.run(main())

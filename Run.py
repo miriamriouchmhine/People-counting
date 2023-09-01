@@ -18,7 +18,7 @@ t0 = time.time()
 #Declaramos la variable global ocupación anterior al principio del código,
 global ocu_anterior
 ocu_anterior = -1
-
+	
 def run():
 	start_time = time.time()
 	# construct the argument parse and parse the arguments
@@ -94,7 +94,8 @@ def run():
 	else:
 		print("[INFO] Starting the video..")
 		vs = cv2.VideoCapture(args["input"])
-
+	
+	
 	# Obtener número total de fotogramas
 	frame_count = 0
 
@@ -169,7 +170,7 @@ def run():
 			# set the status and initialize our new set of object trackers
 			status = "Detecting"
 			trackers = []
-
+			factor = 1/media
 			# convert the frame to a blob and pass the blob through the
 			# network and obtain the detections
 			blob = cv2.dnn.blobFromImage(frame, factor_escala, (W, H), media)
@@ -355,19 +356,19 @@ def run():
 			schedule.every(1).seconds.do(run())
 		#------------------Conteo mostrando imagen en pantalla--------------------------------------------
 		# show the output frame
-		cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
-		key = cv2.waitKey(1) & 0xFF
-
+		# cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
+		# key = cv2.waitKey(1) & 0xFF
+		
 
 		# # # if the `q` key was pressed, break from the loop
-		if key == ord("q"):
-			break
-
-		#------------------Conteo sin mostrar imagen en pantalla------------------------------------------
-
-		#if the `q` key was pressed, break from the loop
-		# if cv2.waitKey(1) & 0xFF == ord("q"):
+		# if key == ord("q"):
 		# 	break
+		
+		#------------------Conteo sin mostrar imagen en pantalla------------------------------------------	
+		
+		#if the `q` key was pressed, break from the loop
+		if cv2.waitKey(1) & 0xFF == ord("q"):
+			break
 
 		#------------------------------------------------------------
 

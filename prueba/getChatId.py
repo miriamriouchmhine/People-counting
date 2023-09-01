@@ -2,7 +2,7 @@
 import telegram
 
 #Cargamos el token 
-bot_token = "6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg"
+bot_token = "TU_TOKEN"
 bot = telegram.Bot(token=bot_token)
 
 #Función que obtiene el chat_id. 
