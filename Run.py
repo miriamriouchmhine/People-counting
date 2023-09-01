@@ -2,26 +2,23 @@ from mylib.centroidtracker import CentroidTracker
 from mylib.trackableobject import TrackableObject
 from imutils.video import VideoStream
 from imutils.video import FPS
-from mylib.mailer import Mailer
 from mylib import config, thread
 import time, schedule
 import numpy as np
 import cv2
 import argparse, imutils
 import time, dlib, datetime
-from datetime import datetime, timedelta
-from itertools import zip_longest
+from datetime import datetime
 import mysql.connector
-from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, factor_escala, esta_dentro_de_franja_horaria 
-import signal
+from mylib.config import prototxt, model, frame_size, downIsEntry, line_color, line_position, line_thickness, pixel_end_height, pixel_end_width, pixel_start_height, pixel_start_width, confidence_config, skip_frames, media, esta_dentro_de_franja_horaria
 from mylib.alertas import obtener_ultimo_dato
 
 t0 = time.time()
 
-#Declaramos la variable global ocupación anterior al principio del código, 
+#Declaramos la variable global ocupación anterior al principio del código,
 global ocu_anterior
 ocu_anterior = -1
-	
+
 def run():
 	start_time = time.time()
 	# construct the argument parse and parse the arguments
@@ -36,34 +33,14 @@ def run():
 		"bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
 		"dog", "horse", "motorbike", "person", "pottedplant", "sheep",
 		"sofa", "train", "tvmonitor"]
-	
-	# load our serialized model from disk
-	net = cv2.dnn.readNetFromCaffe(prototxt, model)
-	if not args.get("input", False):
-		if esta_dentro_de_franja_horaria():
-			# grab a reference to the ip camera
-			print("[INFO] Starting the live stream..")
-			vs = VideoStream(config.url).start()
-			time.sleep(2.0)
-		else:
-			print("Fuera de la franja horaria. Iniciando conteo desde cero.")
-			while not esta_dentro_de_franja_horaria():
-				time.sleep(1)
-			print("[INFO] Starting the live stream..")
-			vs = VideoStream(config.url).start()
-			time.sleep(2.0)
 
-	else:
-		print("[INFO] Starting the video..")
-		vs = cv2.VideoCapture(args["input"])
-	
 	#-------------------------GUARDAR EN BASE DATOS-----------------------------------
 	#Crear conexion a la base de datos
 	conn = mysql.connector.connect(
 		host="localhost",
 		user="root",
 		#password="12345678"
-		password="admin"
+		password="12345678"
 	)
 	#Crear un cursor para ejecutar comandos SQL
 	cur = conn.cursor()
@@ -89,11 +66,14 @@ def run():
 		print(f"Se ha insertadp el registro: {fecha_hora}, {x}")
 
 
-	ocu_inicio = obtener_ultimo_dato()
+
 	# Iniciar el conteo desde el último dato de ocupación o desde cero si es un nuevo día
 	if esta_dentro_de_franja_horaria():
+		ocu_inicio = obtener_ultimo_dato()
 		print("Iniciando conteo desde la última ocupación registrada:", ocu_inicio)
 	else:
+		ocu_inicio = 0
+		guardar_x(ocu_inicio)
 		print("Fuera de la franja horaria. Iniciando conteo desde cero.")
 		# Esperar hasta que sea las 8:30 del próximo día
 		ocu_inicio = 0
@@ -101,9 +81,20 @@ def run():
 		while not esta_dentro_de_franja_horaria():
 			time.sleep(1)
 		print("Iniciando conteo desde cero.")
-		
-	 
+
+# load our serialized model from disk
+	net = cv2.dnn.readNetFromCaffe(prototxt, model)
+	if not args.get("input", False):
 	
+		print("[INFO] Starting the live stream..")
+		vs = VideoStream(config.url).start()
+		time.sleep(2.0)
+	
+
+	else:
+		print("[INFO] Starting the video..")
+		vs = cv2.VideoCapture(args["input"])
+
 	# Obtener número total de fotogramas
 	frame_count = 0
 
@@ -142,7 +133,7 @@ def run():
 
 	# loop over frames from the video stream
 	while True:
-		
+
 		# grab the next frame and handle if we are reading from either
 		# VideoCapture or VideoStream
 		frame = vs.read()
@@ -295,13 +286,13 @@ def run():
 							empty.append(totalDown)
 							to.counted = True
 
-						
+
 						elif direction > 0 and centroid[1] > line_position:
 							totalUp += 1
 							empty1.append(totalUp)
 
 							to.counted = True
-						
+
 					x = []
 					# compute the sum of total people inside
 					x.append(len(empty)-len(empty1))
@@ -317,7 +308,7 @@ def run():
 			cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
 				cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
 			cv2.circle(frame, (centroid[0], centroid[1]), 4, (255, 255, 255), -1)
-		
+
 
 		# construct a tuple of information we will be displaying on the
 		info = [
@@ -362,23 +353,23 @@ def run():
 
 		if not esta_dentro_de_franja_horaria():
 			schedule.every(1).seconds.do(run())
-		#------------------Conteo mostrando imagen en pantalla--------------------------------------------		
+		#------------------Conteo mostrando imagen en pantalla--------------------------------------------
 		# show the output frame
-		# cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
-		# key = cv2.waitKey(1) & 0xFF
-		
+		cv2.imshow("Real-Time Monitoring/Analysis Window", frame)
+		key = cv2.waitKey(1) & 0xFF
+
 
 		# # # if the `q` key was pressed, break from the loop
-		# if key == ord("q"):
-		# 	break
-		
-		#------------------Conteo sin mostrar imagen en pantalla------------------------------------------	
-		
-		#if the `q` key was pressed, break from the loop
-		if cv2.waitKey(1) & 0xFF == ord("q"):
+		if key == ord("q"):
 			break
 
-		#------------------------------------------------------------	
+		#------------------Conteo sin mostrar imagen en pantalla------------------------------------------
+
+		#if the `q` key was pressed, break from the loop
+		# if cv2.waitKey(1) & 0xFF == ord("q"):
+		# 	break
+
+		#------------------------------------------------------------
 
 
 		# increment the total number of frames processed thus far and
@@ -399,20 +390,19 @@ def run():
 	fps.stop()
 	print("[INFO] elapsed time: {:.2f}".format(fps.elapsed()))
 	print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
-	
+
 	# issue 15
 	if config.Thread:
 		vs.release()
 
 	# close any open windows
 	cv2.destroyAllWindows()
-	
+
 
 ##learn more about different schedules here: https://pypi.org/project/schedule/
 if config.Scheduler:
     print("scheduler")
     schedule.every(1).seconds.do(run)
-    
     while 1:
 	    schedule.run_pending()
 

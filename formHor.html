@@ -2,20 +2,28 @@
 <html>
 <head>
     <title>Actualizar Horario</title>
+    <link rel="stylesheet" type="text/css" href="mylib/formCss.css">
 </head>
 <body>
+  <div class="header">
+    <img src="imagenes/crai-biblioteca.png" alt="Imagen de encabezado" class="top-right">
+  </div>
+  <div class="container">
+    <img src="imagenes/OIP.jpg" alt="Imagen de encabezado" >
     <form id="formulario" action="https://api.telegram.org/bot6062087905:AAE3wffPdFFfxmP2wVaoZizT_l5lgZYOOUg/sendMessage" method="post">
-        <input type="text" name="chat_id" value="-1001925970449" hidden>
-        <label for="mes">Introduce el mes o meses:</label>
-        <input type="text" id="mes" name="mes" required value="" placeholder="Septiembre-Octubre">
-        <label for="dias">Introduce los días:</label>
-        <input type="text" id="dias" name="dias" required value="" placeholder="Lunes a Viernes">
-        <label for="horario">Introduce el mes:</label>
-        <input type="text" id="horario" name="horario" required value="" placeholder="8:30-21:00">
-        <input type="text" name="text" id="message_text" value="" hidden>
-        <input type="text" name="parse_mode" value="HTML" hidden> <!-- Agregamos el campo parse_mode con valor "HTML" -->
-        <input type="submit" value="Submit">
-      </form>
+      <input type="text" name="chat_id" value="-1001925970449" hidden>
+      <label for="mes">Introduce el mes o meses:</label>
+      <input type="text" id="mes" name="mes" required value="" placeholder="Septiembre-Octubre">
+      <label for="dias">Introduce los días:</label>
+      <input type="text" id="dias" name="dias" required value="" placeholder="Lunes a Viernes">
+      <label for="horario">Introduce el mes:</label>
+      <input type="text" id="horario" name="horario" required value="" placeholder="8:30-21:00">
+      <input type="text" name="text" id="message_text" value="" hidden>
+      <input type="text" name="parse_mode" value="HTML" hidden> <!-- Agregamos el campo parse_mode con valor "HTML" -->
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+    
 
       <script>
         // Actualizar el valor del campo de texto "text"
